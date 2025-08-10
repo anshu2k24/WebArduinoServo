@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebArduino</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div class="full-body">
+      <div class="nav">
+        <h1 class="title">WebArduino</h1>
+        <h3 class="tagline">Controlling servo by internet</h3>
+        <p class="me">~Anshu Pati</p>
+      </div>
+      <div class="control-section">
+        <p class="instruction-1">
+          You can control the servo by using the below buttons!
+        </p>
+        <p class="angle">
+          Current angle: <span class="angle-value">90</span> degrees
+        </p>
+        <button type="button" class="anti-servo">Turn anti-clockwise</button>
+        <button type="button" class="clock-servo">Turn clockwise</button>
+        <button type="button" class="center-servo">reset</button>
+      </div>
+    </div>
+
+    <style>
+      /* General Reset & Fonts */
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: radial-gradient(circle at top, #141414 0%, #0d0d0d 100%);
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .me {
+        font-size: 0.8rem;
+        color: rgb(255, 106, 0);
+        text-align: center;
+      }
+
+      /* Toast Container */
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #ffcc00;
+        color: #0d0d0d;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+        font-weight: 600;
+        font-size: 0.95rem;
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 9999;
+        backdrop-filter: blur(4px);
+      }
+
+      .toast.error {
+        background: linear-gradient(135deg, #e63946, #cc0000);
+        color: #fff;
+      }
+
+      .toast.success {
+        background: linear-gradient(135deg, #38a169, #2d6a4f);
+        color: #fff;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      /* Container */
+      .full-body {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+        animation: fadeIn 0.9s ease forwards;
+      }
+
+      /* Nav / Title */
+      .nav {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #ffcc00;
+        text-shadow: 0 2px 10px rgba(255, 204, 0, 0.2);
+      }
+
+      .tagline {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.75);
+      }
+
+      /* Controls Section */
+      .control-section {
+        text-align: center;
+      }
+
+      .instruction-1 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+
+      .angle {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+        color: #ffcc00;
+      }
+
+      /* Buttons */
+      button {
+        display: inline-block;
+        margin: 0.5rem;
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        color: #0d0d0d;
+        /* background: #ffcc00; */
+        /* box-shadow: 0 4px 12px rgba(255, 204, 0, 0.25); */
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-2px) scale(1.04);
+        /* box-shadow: 0 8px 20px rgba(255, 204, 0, 0.45); */
+      }
+
+      button:active:not(:disabled) {
+        transform: scale(0.98);
+      }
+
+      /* Button Variants */
+      .center-servo {
+        background: linear-gradient(135deg, #ffd60a, #ffcc00);
+        color: #0d0d0d;
+      }
+
+      .anti-servo {
+        background: linear-gradient(135deg, #e63946, #cc0000);
+        color: #fff;
+      }
+
+      .clock-servo {
+        background: linear-gradient(135deg, #38a169, #2d6a4f);
+        color: #fff;
+      }
+
+      /* Disabled Button */
+      button:disabled {
+        background: rgba(255, 255, 255, 0.15) !important;
+        color: rgba(255, 255, 255, 0.4) !important;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+        border: 1px dashed rgba(255, 255, 255, 0.25);
+      }
+
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 500px) {
+        .title {
+          font-size: 1.8rem;
+        }
+        button {
+          width: 100%;
+          margin: 0.4rem 0;
+        }
+      }
+    </style>
+
+    <script>
+      const socket = io();
+      const antiServo = document.querySelector(".anti-servo");
+      const clockServo = document.querySelector(".clock-servo");
+      const resetservo = document.querySelector(".center-servo");
+      const angleValue = document.querySelector(".angle-value");
+      const instruction = document.querySelector(".instruction-1");
+
+      // // Listen once for angle updates from server
+      // socket.on("Current angle", (data) => {
+      //   const angle = parseInt(data.angle, 10);
+      //   angleValue.textContent = angle;
+
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => {
+          toast.classList.remove("show");
+        }, 2500);
+      }
+
+      // Modify your socket listener to show messages
+      socket.on("Current angle", (data) => {
+        const angle = parseInt(data.angle, 10);
+        angleValue.textContent = angle;
+
+        if (angle >= 170) {
+          clockServo.disabled = false;
+          antiServo.disabled = true;
+          instruction.textContent = "Cannot turn clockwise anymore";
+          showToast("Max clockwise limit reached!", "error");
+        } else if (angle <= 10) {
+          antiServo.disabled = false;
+          clockServo.disabled = true;
+          instruction.textContent = "Cannot turn anti-clockwise anymore";
+          showToast("Max anti-clockwise limit reached!", "error");
+        } else {
+          antiServo.disabled = false;
+          clockServo.disabled = false;
+          instruction.textContent =
+            "You can control the servo by using the below buttons!";
+          showToast(`Angle set to ${angle}°`, "success");
+        }
+      });
+
+      // Send control commands to server
+      antiServo.addEventListener("click", () => {
+        socket.emit("anti-servo", { status: "l" });
+      });
+      clockServo.addEventListener("click", () => {
+        socket.emit("clock-servo", { status: "r" });
+      });
+      resetservo.addEventListener("click", () => {
+        socket.emit("reset-servo", { status: "c" });
+      });
+    </script>
+    <div id="toast" class="toast"></div>
+  </body>
+</html>
