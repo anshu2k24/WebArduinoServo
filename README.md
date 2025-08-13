@@ -17,20 +17,29 @@ Control your Arduino-connected servo from anywhere using a Node.js server and VS
 
 ## Setup and kick off
 
-1. **Connect Arduino and Upload Servo Code**  
-2. **Install serialport**  
+1. **Connect Arduino and Upload Servo Code**
+   - The servo script is saved within the [servoscript\servoscript.ino]
+   - Upload the script onto arduino uno
+   - Test it through the Serial port with commands ("l","r","c")
+3. **Install serialport**  
    ```bash
    npm i socket.io serialport
    ```
-3. **Start Node.js Server**  
+   
+   or just do
+   
+   ```bash
+   npm i
+   ```
+5. **Start Node.js Server**  
    ```bash
    node server.js
    ```
-4. Forward the Server Port in VS Code
+6. Forward the Server Port in VS Code
    - Open VS Code
    - Use the port forwarding feature
    - Forward your local server port (e.g., 3000) to a public port
-5. Access Your Server Remotely - Open the forwarded URL in your phone or any remote device to control your servo.
+7. Access Your Server Remotely - Open the forwarded URL in your phone or any remote device to control your servo.
 
 ## Security Considerations
 - This setup exposes your server over the internet — do not expose sensitive ports or services.
